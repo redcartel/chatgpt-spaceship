@@ -14,6 +14,27 @@
   </head>
   <body>
     <canvas id="gameCanvas" width="800" height="600"></canvas>
-    <script src="/game.js"></script>
+    <div id="game-info">
+      <h2>Spaceship Game by Carter Adams and ChatGPT</h2>
+      <p>Controls:</p>
+      <ul>
+        <li>Left / right to move, up to accelerate</li>
+        <li>Spacebar to shoot</li>
+        <li>Gamepad left stick to rotate</li>
+        <li>Gamepad A button to accelerate, B to shoot</li>
+      </ul>
+      <p>Rules:</p>
+      <ul>
+        <li>Avoid colliding with the enemy spaceship and the star</li>
+        <li>Destroy the enemy spaceship with projectiles to earn points</li>
+        <li>The game ends when you run out of lives</li>
+      </ul>
+    </div>
+    <hr>
+    <p>This was coded in 25 ChatGPT4 prompts and 2 ChatGPT3.5 prompts.</p>
+    <p>After about 20 prompts, it started making obvious errors, using the wrong names for its own functions and variables, that kind of thing.</p>
+    <p>The visual styling is all from ChatGPT but after it was all done, I tweaked some velocity etc. constants to improve gameplay.</p>
+    <p>I didn't do much to clean up the source from how ChatGPT wrote it, you can take a look.</p>
   </body>
+  <script src="/game.js"></script>
 </html>

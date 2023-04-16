@@ -41,12 +41,24 @@ function displayGamepadStatus() {
 window.addEventListener('gamepadconnected', (e) => {
     console.log('Gamepad connected:', e.gamepad);
     gamepadConnected = true;
+    requestAnimationFrame(handleGamepadInput);
 });
 
 window.addEventListener('gamepaddisconnected', (e) => {
     console.log('Gamepad disconnected:', e.gamepad);
     gamepadConnected = false;
 });
+
+function shootProjectile() {
+    const projectile = new Projectile(
+        spaceship.x,
+        spaceship.y,
+        spaceship.angle,
+        spaceship.speedX,
+        spaceship.speedY
+    );
+    projectiles.push(projectile);
+}
 
 
 class Spaceship {
@@ -56,9 +68,19 @@ class Spaceship {
         this.angle = 0;
         this.speedX = 0; // Update the initial velocity
         this.speedY = 0;
-        this.rotationSpeed = 5;
+        this.rotationSpeed = 1;
         this.acceleration = 0.1;
         this.mass = 1;
+        this.thrustPower = 0.1;
+    }
+
+    rotate(direction) {
+        this.angle += this.rotationSpeed * direction;
+    }
+
+    thrust() {
+        this.speedX += this.thrustPower * Math.cos(this.angle);
+        this.speedY += this.thrustPower * Math.sin(this.angle);
     }
 
     draw() {
@@ -173,7 +195,7 @@ class Projectile {
     }
 }
 
-const projectiles = [];
+let projectiles = [];
 
 function fireProjectile() {
     const projectile = new Projectile(spaceship.x, spaceship.y, spaceship.angle);
@@ -226,9 +248,9 @@ function drawGameOver() {
     ctx.fillText('Game Over', canvas.width / 2, canvas.height / 2);
 }
 
-const spaceship = new Spaceship();
-const enemySpaceship = new EnemySpaceship();
-const star = new Star();
+let spaceship = new Spaceship();
+let enemySpaceship = new EnemySpaceship();
+let star = new Star();
 
 function respawnEnemy() {
     console.log('respawn enemy')
@@ -269,6 +291,11 @@ function handleGamepadInput() {
 
     const gamepad = gamepads[0];
 
+    if (gameOver && gamepad.buttons.some(button => button.pressed)) {
+        resetGame();
+        return;
+      }
+
     // Map gamepad buttons and axes to game actions
     const thrustButton = gamepad.buttons[0]; // Change the index to match your gamepad
     const shootButton = gamepad.buttons[1]; // Change the index to match your gamepad
@@ -280,8 +307,9 @@ function handleGamepadInput() {
     }
 
     // Handle rotation
+    const rotationSpeed = 0.05; // Adjust this value to change the rotation speed
     if (Math.abs(rotationAxis) > 0.1) {
-        spaceship.rotate(rotationAxis);
+        spaceship.rotate(rotationAxis * rotationSpeed);
     }
 
     // Handle shooting
@@ -289,6 +317,26 @@ function handleGamepadInput() {
         shootProjectile();
     }
     shootButton.lastPressed = shootButton.pressed;
+
+    requestAnimationFrame(handleGamepadInput);
+}
+
+function resetGame() {
+    if (!gameOver) return;
+
+    // Reset game state
+    gameOver = false;
+    score = 0;
+    lives = 3;
+    spaceship = new Spaceship();
+    enemySpaceship = new EnemySpaceship();
+    projectiles = [];
+    // enemyProjectiles = [];
+    star = new Star(canvas.width / 2, canvas.height / 2, 40);
+
+    // Restart the game loop
+    gameLoop();
+    handleGamepadInput();
 }
 
 function gameLoop() {
@@ -298,7 +346,7 @@ function gameLoop() {
     applyGravity(enemySpaceship, star);
 
     displayGamepadStatus();
-    handleGamepadInput();
+    // handleGamepadInput();
 
     spaceship.update();
     spaceship.draw();
@@ -356,16 +404,22 @@ function gameLoop() {
 gameLoop();
 
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowUp') {
-        spaceship.speedX += Math.cos(spaceship.angle) * spaceship.acceleration;
-        spaceship.speedY += Math.sin(spaceship.angle) * spaceship.acceleration;
+    if (gameOver && (e.code === 'Space' || e.code.startsWith('Arrow'))) {
+        resetGame();
+        return;
     }
-    if (e.key === 'ArrowLeft') spaceship.angle -= spaceship.rotationSpeed * (Math.PI / 180);
-    if (e.key === 'ArrowRight') spaceship.angle += spaceship.rotationSpeed * (Math.PI / 180);
-});
 
-document.addEventListener('keydown', (event) => {
-    if (event.code === 'Space') {
+    if (e.key === 'ArrowUp') {
+        // spaceship.speedX += Math.cos(spaceship.angle) * spaceship.acceleration;
+        // spaceship.speedY += Math.sin(spaceship.angle) * spaceship.acceleration;
+        spaceship.thrust();
+    }
+    if (e.key === 'ArrowLeft') spaceship.angle -=  10 * spaceship.rotationSpeed * (Math.PI / 180);
+    if (e.key === 'ArrowRight') spaceship.angle += 10 * spaceship.rotationSpeed * (Math.PI / 180);
+
+    if (e.code === 'Space') {
         fireProjectile();
     }
 });
+
+console.log('loaded')
