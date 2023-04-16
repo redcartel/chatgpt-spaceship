@@ -78,9 +78,9 @@ class Spaceship {
         this.angle += this.rotationSpeed * direction;
     }
 
-    thrust() {
-        this.speedX += this.thrustPower * Math.cos(this.angle);
-        this.speedY += this.thrustPower * Math.sin(this.angle);
+    thrust(n = 1) {
+        this.speedX += this.thrustPower * Math.cos(this.angle) * n;
+        this.speedY += this.thrustPower * Math.sin(this.angle) * n;
     }
 
     draw() {
@@ -294,7 +294,7 @@ function handleGamepadInput() {
     if (gameOver && gamepad.buttons.some(button => button.pressed)) {
         resetGame();
         return;
-      }
+    }
 
     // Map gamepad buttons and axes to game actions
     const thrustButton = gamepad.buttons[0]; // Change the index to match your gamepad
@@ -404,20 +404,34 @@ function gameLoop() {
 gameLoop();
 
 document.addEventListener('keydown', (e) => {
+
     if (gameOver && (e.code === 'Space' || e.code.startsWith('Arrow'))) {
+        e.preventDefault();
         resetGame();
         return;
     }
 
     if (e.key === 'ArrowUp') {
+        e.preventDefault();
         // spaceship.speedX += Math.cos(spaceship.angle) * spaceship.acceleration;
         // spaceship.speedY += Math.sin(spaceship.angle) * spaceship.acceleration;
-        spaceship.thrust();
+        spaceship.thrust(5);
     }
-    if (e.key === 'ArrowLeft') spaceship.angle -=  10 * spaceship.rotationSpeed * (Math.PI / 180);
-    if (e.key === 'ArrowRight') spaceship.angle += 10 * spaceship.rotationSpeed * (Math.PI / 180);
+    if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        spaceship.angle -= 15 * spaceship.rotationSpeed * (Math.PI / 180);
+    }
+    if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        spaceship.angle += 15 * spaceship.rotationSpeed * (Math.PI / 180);
+    }
+
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+    }
 
     if (e.code === 'Space') {
+        e.preventDefault();
         fireProjectile();
     }
 });
